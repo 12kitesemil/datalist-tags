@@ -18,59 +18,62 @@
             <div id="tags" class="col" style="">
 
                         <form id="form">
-                            <select style="" multiple name="selectedAudiences" id="selectedAudiences">
-                                <option value="mgr">Manager</option>
-                                <option value="stf">Staff</option>
-                                <option value="usr">User</option>
-                                <option value="pblc">Public</option>
-                                <option value="ar1">Audience 1</option>
-                                <option value="ar2">Audience 2</option>
-                                <option value="ar3">Audience 3</option>
-                                <option value="ar4">Audience 4</option>
+                            <label for="selectedAudiences" class="form-label">Audiences</label>
+                            <select style="visibility: hidden; display: none;" multiple name="selectedAudiences" id="selectedAudiences">
                             </select>
                         </form> 
                         <div class="row">
                             <label for="tags-container" class="form-label">Audience</label>
-                            <span class="no-tags-msg text-muted">none selected</span>
-                            <div id="tags-container"> </div>
+                                <div class="input-group mb-3">
+                                <div class="tags-container-outer form-control d-flex flex-wrap align-items-center gx-5">
+                                    <span class="no-tags-msg text-muted">None selected</span>
+                                    <div id="tags-container" class="flex-shrink-1 me-2"> </div>
+                                    <input oninput="onAudienceInput()" type="list" class="form-control border-none audience-selector my-2" list="audience-list" id="audience-input" placeholder="Start typing to add..." style="display: none;">
 
-                            <button class="add-audience-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                                  </svg>
-                            </button>
+                                </div>
+                                <button type="button" class="btn btn-outline-success add-audience-btn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                      </svg>
+                                </button>
+                            </div>
+                            <datalist id="audience-list"></datalist>
+
                         </div>
                         
                         <div id="audience-control" class="row my-1">
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <input oninput="onAudienceInput()" type="list" class="form-control" list="audience-list" id="audience-input" placeholder="Start typing to add..." style="display: none;">
-                                    <datalist id="audience-list"></datalist>
+                                    
+                                    
                                 </div>
                                 
                             </div>
                         </div>
+                    </div>
 
-            </div>
         </div>
     </div>
 
     <script>
-        (function($) {
-            $.fn.tagSelector = function(options, callback) {
-                var settings = $.extend({
-                    
-                })
-                return this.each(function() {
-                    
-                })
-            }
-        })(jQuery)
-    </script>
 
-    <script>
+        const enableAddAudienceButton = () => {
+            $('.add-audience-btn').removeClass('disabled').removeAttr('disabled');
+        }
+        const disableAddAudienceButton = () => {
+            $('.add-audience-btn').addClass('disabled').attr('disabled', 'disabled');
+        }
+        const showAudienceInput = (andFocus) => {
+            $('#audience-input').show();
+            if (andFocus) {
+                $('#audience-input').focus();
+            }
+        }
+        const hideAudienceInput = () => {
+            $('#audience-input').hide();
+        }
 
         let data = {
             selected: ['mgr'],
@@ -98,6 +101,15 @@
             datalist.prepend(`<option class="list-option">${value}</option>`)
         }
 
+        const onAudienceChange = () => {
+            if( tagsContainer.children().length === 0 ) {
+                enableAddAudienceButton();
+                hideAudienceInput();
+                $('.no-tags-msg').show()
+            } else {
+
+            }
+        }
 
         let tagClickHandler = function() {
             //remove the tag
@@ -114,13 +126,9 @@
 
             appendOptionToDatalist(humanFriendlyValue)
 
-
+            onAudienceChange();
             //show add button and hide input when no tags are selected
-            if( tagsContainer.children().length === 0 ) {
-                $('.add-audience-btn').show(200)
-                $('#audience-input').hide(200)
-                $('.no-tags-msg').show()
-            }
+
 
             //sort?
 
@@ -133,6 +141,8 @@
             let input = $('#audience-input')
             let options = document.querySelector('#audience-list').childNodes
 
+            let changeHappened = false;
+
             for (let i = 0; i < options.length; i++) {
                 let option = options[i]
                 let humanFriendlyValue = options[i].value
@@ -143,19 +153,23 @@
 
                     input.val('')
                     $(option).remove()
-
+                    changeHappened = true;
                     break;
                 }
+            }
+            if (changeHappened) {
+                onAudienceChange();
             }
         }
 
         function createTagElement( humanFriendlyValue ) {
             tagsContainer.append(function() {
-                        let outer = $(`<span class="tag-item"><span class="tag-label">${humanFriendlyValue}</span></span>`);
+                        let outer = $(`<span class="tag-item badge rounded-pill text-bg-primary me-1 ps-3"><span class="tag-label">${humanFriendlyValue}</span></span>`);
                         let cross = $(`
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                            <span class="cross-button"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x ms-1" viewBox="0 0 16 16">
                                 <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                             </svg>
+                            </span>
                         `)
 
                         cross.click(tagClickHandler)
@@ -171,29 +185,32 @@
 
 
         $('.add-audience-btn').click(function() {
-            $('#audience-input').show(200)
-            $(this).hide()
+            showAudienceInput(true);
+            disableAddAudienceButton();
+     
+
+     
         })
 
 
 
 
         //populate datalist
-        // for (let key in data.options) {
-        //     let value = data.options[key]
-        //     if(data.selected.indexOf(key) === -1) {
-        //         datalist.append(`<option class="list-option">${value}</option>`)
-        //     } else {
-        //         createTagElement( value)
+        for (let key in data.options) {
+            let value = data.options[key]
+            if(data.selected.indexOf(key) === -1) {
+                datalist.append(`<option class="list-option">${value}</option>`)
+            } else {
+                createTagElement( value)
 
-        //     }
-        // }
+            }
+        }
 
-        // if(tagsContainer.children().length) {
-        //     $('.no-tags-msg').hide()
-        // } else {
-        //     $('.no-tags-msg').show()
-        // }
+        if(tagsContainer.children().length) {
+            $('.no-tags-msg').hide()
+        } else {
+            $('.no-tags-msg').show()
+        }
 
 
 
@@ -206,8 +223,10 @@
         }
 
         #tags-container {
-            margin-bottom: 1rem;
+            /* margin-bottom: 1rem; */
             width: auto;
+            justify-content: space-evenly;
+            align-items: center;
         }
 
         .card-body .row {
@@ -217,20 +236,38 @@
 
 
         span.tag-item {
-            background-color: #dae9f7;
+            /* background-color: #dae9f7;
             padding: 0.5rem;
             border-radius: 4px;
-            margin-right: 0.2rem;
+            margin-right: 0.2rem; */
+            font-size: 16px;
         }
 
         .add-audience-btn {
-            order: 99;
+            
+            /* order: 99;
             width: auto;
             padding: 0;
             height: 25px;
             background-color: transparent;
-            border: none;
+            border: none; */
         }
+        .add-audience-btn svg {
+            top: -2px;
+            position: relative;
+        }
+        .tags-container-outer {
+            /* border: 1px solid #cccccc; */
+        }
+        .cross-button {
+            cursor: pointer;
+        }
+        .audience-selector {
+            min-width: 150px;
+            width:100%;
+            max-width: 350px;
+        }
+        
 
 
     </style>
