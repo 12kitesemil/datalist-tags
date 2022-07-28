@@ -19,7 +19,15 @@
 
                         <form id="form">
                             <label for="selectedAudiences" class="form-label">Audiences</label>
-                            <select style="visibility: hidden; display: none;" multiple name="selectedAudiences" id="selectedAudiences">
+                            <select style="visibility: hidden; display: none;" multiple="" name="selectedAudiences" id="selectedAudiences">
+                                <option value="pblc">Public</option>
+                                <option value="usr">User</option>
+                                <option value="stf">Staff</option>
+                                <option selected value="mgr">Manager</option>
+                                <option value="ar1">Area 1</option>
+                                <option value="ar2">Area 2</option>
+                                <option value="ar3">Area 3</option>
+                                <option value="ar4">Area 4</option>
                             </select>
                         </form> 
                         <div class="row">
@@ -59,19 +67,19 @@
 
     <script>
 
-        let data = {
-            selected: ['mgr'],
-            options: {
-                mgr: 'Manager',
-                usr: 'User',
-                stf: 'Staff',
-                pblc: 'Public',
-                ar1: 'Area 1',
-                ar2: 'Area 2',
-                ar3: 'Area 3',
-                ar4: 'Area 4',
-            }
-        }
+        // let data = {
+        //     selected: ['mgr'],
+        //     options: {
+        //         mgr: 'Manager',
+        //         usr: 'User',
+        //         stf: 'Staff',
+        //         pblc: 'Public',
+        //         ar1: 'Area 1',
+        //         ar2: 'Area 2',
+        //         ar3: 'Area 3',
+        //         ar4: 'Area 4',
+        //     }
+        // }
 
         let processedOptions = [];
 
@@ -154,11 +162,17 @@
             //
         }
 
+        // let addOptionToFormSelectControl = (option) => {
+        //     $('#selectedAudiences').append(`<option selected value="${option.value}">${option.label}</option>`)
+        // }
+        // let removeOptionFromFormSelectControl = (option) => {
+        //     $('#selectedAudiences').find(`option[value="${option.value}"]`).remove()
+        // }
         let addOptionToFormSelectControl = (option) => {
-            $('#selectedAudiences').append(`<option selected value="${option.value}">${option.label}</option>`)
+            $(`#selectedAudiences option[value="${option.value}"]`).attr('selected', 'selected')
         }
         let removeOptionFromFormSelectControl = (option) => {
-            $('#selectedAudiences').find(`option[value="${option.value}"]`).remove()
+            $(`#selectedAudiences option[value="${option.value}"]`).removeAttr('selected')
         }
 
         let onAudienceInput = function(e) {
@@ -220,26 +234,46 @@
         }
 
 
+
+
         $('.add-audience-btn').click(function() {
             showAudienceInput(true);
             disableAddAudienceButton();
-     
-
-     
         })
 
-        const processOptions = () => {
-            processedOptions = [];
-            let keys = Object.keys(data.options);
-            for (let i = 0; i < keys.length; i++) {
-                let key = keys[i];
-                let label = data.options[key];
+        // const processOptions = () => {
+        //     processedOptions = [];
+        //     let keys = Object.keys(data.options);
+        //     for (let i = 0; i < keys.length; i++) {
+        //         let key = keys[i];
+        //         let label = data.options[key];
+        //         processedOptions.push({
+        //             value: key,
+        //             label: label,
+        //             order: i,
+        //         })
+        //     }
+        // }
+
+        const processOptionsFromSelect = () => {
+            let options = $('#selectedAudiences option');
+            for (let i = 0; i < options.length; i++) {
+                let option = options[i];
+                let value = option.value;
+                let label = option.innerHTML;
+                let selected = false;
+                let selectedAttr = option.getAttribute('selected')
+                if (typeof selectedAttr !== 'undefined' && selectedAttr !== false && selectedAttr !== null) {
+                    selected = true;
+                }
                 processedOptions.push({
-                    value: key,
+                    value: value,
                     label: label,
                     order: i,
+                    selected: selected
                 })
             }
+            console.log(processedOptions)
         }
 
         const optionToDataListElement = (option, selected) => {
@@ -258,7 +292,10 @@
             //     }
             // }
             processedOptions.forEach(element => {
-                if (!data.selected.includes(element.value)) {
+                // if (data.selected.includes(element.value)) {
+                //     element.selected = true
+                // }
+                if (!element.selected) {
                     let html = optionToDataListElement(element)
                     datalist.append(html)
                 } else {
@@ -275,7 +312,7 @@
         }
 
         const init = () => {
-            processOptions();
+            processOptionsFromSelect();
             initDataList();
         }
 
