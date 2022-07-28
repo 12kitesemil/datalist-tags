@@ -28,7 +28,7 @@
                                 <div class="tags-container-outer form-control d-flex flex-wrap align-items-center gx-5">
                                     <span class="no-tags-msg text-muted">None selected</span>
                                     <div id="tags-container" class="flex-shrink-1 me-2"> </div>
-                                    <input oninput="onAudienceInput()" type="list" class="form-control border-none audience-selector my-2" list="audience-list" id="audience-input" placeholder="Start typing to add..." style="display: none;">
+                                    <input oninput="onAudienceInput()" type="text" class="form-control border-none audience-selector my-2" list="audience-list" id="audience-input" placeholder="Start typing to add..." style="display: none;">
 
                                 </div>
                                 <button type="button" class="btn btn-outline-success add-audience-btn">
@@ -59,6 +59,27 @@
 
     <script>
 
+        let data = {
+            selected: ['mgr'],
+            options: {
+                mgr: 'Manager',
+                usr: 'User',
+                stf: 'Staff',
+                pblc: 'Public',
+                ar1: 'Area 1',
+                ar2: 'Area 2',
+                ar3: 'Area 3',
+                ar4: 'Area 4',
+            }
+        }
+
+        let processedOptions = [];
+
+        let tags = [];
+        let tagsContainer = $('#tags-container')
+        let datalist = $('#audience-list')
+
+
         const enableAddAudienceButton = () => {
             $('.add-audience-btn').removeClass('disabled').removeAttr('disabled');
         }
@@ -75,30 +96,21 @@
             $('#audience-input').hide();
         }
 
-        let data = {
-            selected: ['mgr'],
-            options: {
-                mgr: 'Manager',
-                usr: 'User',
-                stf: 'Staff',
-                pblc: 'Public',
-                ar1: 'Area 1',
-                ar2: 'Area 2',
-                ar3: 'Area 3',
-                ar4: 'Area 4',
-            }
-        }
-
-        let tags = [];
-        let tagsContainer = $('#tags-container')
-        let datalist = $('#audience-list')
-
         let getKeyByValue = function(object, value) {
             return Object.keys(object).find(key => object[key] === value);
         }
 
-        let appendOptionToDatalist = function(value) {
-            datalist.prepend(`<option class="list-option">${value}</option>`)
+        let getOptionByValue = function(value) {
+            
+            let a = processedOptions.filter(option => { return option.value === value});
+            if (a.length > 0) {
+                return a[0];
+            } 
+        }
+
+        let appendOptionToDatalist = function(option) {
+            let html = optionToDataListElement(option)
+            datalist.prepend(html)
         }
 
         const onAudienceChange = () => {
@@ -107,25 +119,32 @@
                 hideAudienceInput();
                 $('.no-tags-msg').show()
             } else {
-
+                $('.no-tags-msg').hide()
             }
         }
 
+        //the click handler is on the cross element rather than the entire tag, so we look at the parent for the 
+        //value and also remove the parent. 
         let tagClickHandler = function() {
             //remove the tag
-            $(this).parent().remove()
 
 
-            
+
+            let selectedValue = $(this)
             //add value back to the selection pool
-            let humanFriendlyValue = $(this).parent().find('.tag-label').first().html()
+            let value = selectedValue.parent().attr('data-item-value');
+            let option = getOptionByValue(value);
 
-            //remove the option from the form
-            let value = getKeyByValue(data.options, humanFriendlyValue)
-            $(`#selectedAudiences option[value="${value}"]`).remove()
+            // let humanFriendlyValue = $(this).parent().find('.tag-label').first().html()
 
-            appendOptionToDatalist(humanFriendlyValue)
+            // //remove the option from the form
+            // let value = getKeyByValue(data.options, humanFriendlyValue)
+            // $(`#selectedAudiences option[value="${value}"]`).remove()
+            removeOptionFromFormSelectControl(option);
 
+            appendOptionToDatalist(option)
+
+            $(this).parent().remove()
             onAudienceChange();
             //show add button and hide input when no tags are selected
 
@@ -135,12 +154,19 @@
             //
         }
 
+        let addOptionToFormSelectControl = (option) => {
+            $('#selectedAudiences').append(`<option selected value="${option.value}">${option.label}</option>`)
+        }
+        let removeOptionFromFormSelectControl = (option) => {
+            $('#selectedAudiences').find(`option[value="${option.value}"]`).remove()
+        }
 
-        let onAudienceInput = function() {
+        let onAudienceInput = function(e) {
 
             let input = $('#audience-input')
             let options = document.querySelector('#audience-list').childNodes
 
+            let selectedOption = false;
             let changeHappened = false;
 
             for (let i = 0; i < options.length; i++) {
@@ -148,23 +174,33 @@
                 let humanFriendlyValue = options[i].value
 
                 if (humanFriendlyValue === input.val() && tags.indexOf(humanFriendlyValue) === -1) {
-
-                    createTagElement(humanFriendlyValue)
-
-                    input.val('')
-                    $(option).remove()
-                    changeHappened = true;
+                    selectedOption = option;
+                    
                     break;
                 }
+            }
+            if (selectedOption) {
+                let dv = $(selectedOption).attr('data-value');
+                if (dv) {
+                    let option = getOptionByValue(dv)
+                    if (option) {
+                        createTagElement(option)
+                        $(selectedOption).remove()
+                    }
+                }
+  
+                input.val('')
+
+                changeHappened = true;
             }
             if (changeHappened) {
                 onAudienceChange();
             }
         }
 
-        function createTagElement( humanFriendlyValue ) {
+        function createTagElement( option ) {
             tagsContainer.append(function() {
-                        let outer = $(`<span class="tag-item badge rounded-pill text-bg-primary me-1 ps-3"><span class="tag-label">${humanFriendlyValue}</span></span>`);
+                        let outer = $(`<span class="tag-item badge rounded-pill text-bg-primary me-1 ps-3" data-item-value="${option.value}"><span class="tag-label">${option.label}</span></span>`);
                         let cross = $(`
                             <span class="cross-button"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x ms-1" viewBox="0 0 16 16">
                                 <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
@@ -179,8 +215,8 @@
                     $('.no-tags-msg').hide()
 
                     //create options in the hidden form
-                    let value = getKeyByValue(data.options, humanFriendlyValue)
-                    $('#selectedAudiences').append(`<option selected value="${value}"></option>`)
+                    // let value = getKeyByValue(data.options, humanFriendlyValue)
+                    addOptionToFormSelectControl(option)
         }
 
 
@@ -192,25 +228,62 @@
      
         })
 
-
-
-
-        //populate datalist
-        for (let key in data.options) {
-            let value = data.options[key]
-            if(data.selected.indexOf(key) === -1) {
-                datalist.append(`<option class="list-option">${value}</option>`)
-            } else {
-                createTagElement( value)
-
+        const processOptions = () => {
+            processedOptions = [];
+            let keys = Object.keys(data.options);
+            for (let i = 0; i < keys.length; i++) {
+                let key = keys[i];
+                let label = data.options[key];
+                processedOptions.push({
+                    value: key,
+                    label: label,
+                    order: i,
+                })
             }
         }
 
-        if(tagsContainer.children().length) {
-            $('.no-tags-msg').hide()
-        } else {
-            $('.no-tags-msg').show()
+        const optionToDataListElement = (option, selected) => {
+            let res = `<option class="list-option" data-value="${option.value}">${option.label}</option>`
+            return res;
         }
+
+        const initDataList = () => {
+            // for (let key in data.options) {
+            //     let value = data.options[key]
+            //     if(data.selected.indexOf(key) === -1) {
+            //         datalist.append(`<option class="list-option">${value}</option>`)
+            //     } else {
+            //         createTagElement( value)
+
+            //     }
+            // }
+            processedOptions.forEach(element => {
+                if (!data.selected.includes(element.value)) {
+                    let html = optionToDataListElement(element)
+                    datalist.append(html)
+                } else {
+                    createTagElement(element)
+                }
+            });
+        }
+        const initLayout = () => {
+            if(tagsContainer.children().length) {
+                $('.no-tags-msg').hide()
+            } else {
+                $('.no-tags-msg').show()
+            }
+        }
+
+        const init = () => {
+            processOptions();
+            initDataList();
+        }
+
+        //populate datalist
+        init();
+
+
+
 
 
 
