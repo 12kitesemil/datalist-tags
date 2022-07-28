@@ -83,7 +83,7 @@
 
         let processedOptions = [];
 
-        let tags = [];
+        // let tags = [];
         let tagsContainer = $('#tags-container')
         let datalist = $('#audience-list')
 
@@ -129,6 +129,7 @@
             } else {
                 $('.no-tags-msg').hide()
             }
+            regenerateDataListFromSelectElement()
         }
 
         //the click handler is on the cross element rather than the entire tag, so we look at the parent for the 
@@ -150,7 +151,7 @@
             // $(`#selectedAudiences option[value="${value}"]`).remove()
             removeOptionFromFormSelectControl(option);
 
-            appendOptionToDatalist(option)
+            // appendOptionToDatalist(option)
 
             $(this).parent().remove()
             onAudienceChange();
@@ -187,7 +188,7 @@
                 let option = options[i]
                 let humanFriendlyValue = options[i].value
 
-                if (humanFriendlyValue === input.val() && tags.indexOf(humanFriendlyValue) === -1) {
+                if (humanFriendlyValue === input.val()) {
                     selectedOption = option;
                     
                     break;
@@ -233,7 +234,11 @@
                     addOptionToFormSelectControl(option)
         }
 
-
+        function regenerateDataListFromSelectElement() {
+            let s = _processSelect().filter(option => { return !option.selected });
+            let html = s.map(optionToDataListElement).join("\n");
+            datalist.html(html)
+        }
 
 
         $('.add-audience-btn').click(function() {
@@ -255,8 +260,9 @@
         //     }
         // }
 
-        const processOptionsFromSelect = () => {
+        const _processSelect = () => {
             let options = $('#selectedAudiences option');
+            let res = [];
             for (let i = 0; i < options.length; i++) {
                 let option = options[i];
                 let value = option.value;
@@ -266,14 +272,19 @@
                 if (typeof selectedAttr !== 'undefined' && selectedAttr !== false && selectedAttr !== null) {
                     selected = true;
                 }
-                processedOptions.push({
+                res.push({
                     value: value,
                     label: label,
                     order: i,
                     selected: selected
                 })
             }
-            console.log(processedOptions)
+            return res;
+        }
+
+        const processOptionsFromSelect = () => {
+            processedOptions = _processSelect();
+            // console.log(processedOptions)
         }
 
         const optionToDataListElement = (option, selected) => {
@@ -302,6 +313,7 @@
                     createTagElement(element)
                 }
             });
+
         }
         const initLayout = () => {
             if(tagsContainer.children().length) {
@@ -314,6 +326,7 @@
         const init = () => {
             processOptionsFromSelect();
             initDataList();
+            onAudienceChange();
         }
 
         //populate datalist
