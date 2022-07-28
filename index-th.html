@@ -18,27 +18,28 @@
             <div id="tags" class="col" style="">
 
                         <form id="form">
-                            <label for="selectedAudiences" class="form-label">Audiences</label>
-                            <select style="visibility: hidden; display: none;" multiple name="selectedAudiences" id="selectedAudiences">
+                            <select style="" multiple name="selectedAudiences" id="selectedAudiences">
+                                <option value="mgr">Manager</option>
+                                <option value="stf">Staff</option>
+                                <option value="usr">User</option>
+                                <option value="pblc">Public</option>
+                                <option value="ar1">Audience 1</option>
+                                <option value="ar2">Audience 2</option>
+                                <option value="ar3">Audience 3</option>
+                                <option value="ar4">Audience 4</option>
                             </select>
                         </form> 
                         <div class="row">
                             <label for="tags-container" class="form-label">Audience</label>
-                                <div class="input-group mb-3">
-                                <div class="tags-container-outer form-control">
-                                    <span class="no-tags-msg text-muted">none selected</span>
-                                    <div id="tags-container"> </div>
-        
+                            <span class="no-tags-msg text-muted">none selected</span>
+                            <div id="tags-container"> </div>
 
-                                </div>
-                                <button type="button" class="btn btn-outline-secondary add-audience-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                                      </svg>
-                                </button>
-                            </div>
-
+                            <button class="add-audience-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                  </svg>
+                            </button>
                         </div>
                         
                         <div id="audience-control" class="row my-1">
@@ -51,10 +52,23 @@
                                 
                             </div>
                         </div>
-                    </div>
 
+            </div>
         </div>
     </div>
+
+    <script>
+        (function($) {
+            $.fn.tagSelector = function(options, callback) {
+                var settings = $.extend({
+                    
+                })
+                return this.each(function() {
+                    
+                })
+            }
+        })(jQuery)
+    </script>
 
     <script>
 
@@ -158,28 +172,28 @@
 
         $('.add-audience-btn').click(function() {
             $('#audience-input').show(200)
-            $(this).attr('disabled', true);
+            $(this).hide()
         })
 
 
 
 
         //populate datalist
-        for (let key in data.options) {
-            let value = data.options[key]
-            if(data.selected.indexOf(key) === -1) {
-                datalist.append(`<option class="list-option">${value}</option>`)
-            } else {
-                createTagElement( value)
+        // for (let key in data.options) {
+        //     let value = data.options[key]
+        //     if(data.selected.indexOf(key) === -1) {
+        //         datalist.append(`<option class="list-option">${value}</option>`)
+        //     } else {
+        //         createTagElement( value)
 
-            }
-        }
+        //     }
+        // }
 
-        if(tagsContainer.children().length) {
-            $('.no-tags-msg').hide()
-        } else {
-            $('.no-tags-msg').show()
-        }
+        // if(tagsContainer.children().length) {
+        //     $('.no-tags-msg').hide()
+        // } else {
+        //     $('.no-tags-msg').show()
+        // }
 
 
 
@@ -192,7 +206,7 @@
         }
 
         #tags-container {
-            /* margin-bottom: 1rem; */
+            margin-bottom: 1rem;
             width: auto;
         }
 
@@ -210,16 +224,12 @@
         }
 
         .add-audience-btn {
-            
-            /* order: 99;
+            order: 99;
             width: auto;
             padding: 0;
             height: 25px;
             background-color: transparent;
-            border: none; */
-        }
-        .tags-container-outer {
-            /* border: 1px solid #cccccc; */
+            border: none;
         }
 
 
